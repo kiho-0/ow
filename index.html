@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Overwatch 피드백</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<script>
+// 로그인 체크
+let loginUser = localStorage.getItem("loginUser")
+if(!loginUser){ location.href="login.html" }
+</script>
+
+<h1>🎮 피드백 작성</h1>
+
+<button onclick="logout()">🚪 로그아웃</button>
+
+<div class="form">
+<input type="text" id="name" value="" disabled>
+<select id="hero">
+<option>포지션 선택</option>
+<option>탱커</option>
+<option>딜러</option>
+<option>힐러</option>
+</select>
+<textarea id="feedback" placeholder="리플코드 및 상세내용을 작성해주세요."></textarea>
+<button onclick="addFeedback()">제출</button>
+</div>
+
+<button class="mail-toggle" onclick="toggleMail()">📩 메일함</button>
+<div id="userMail" class="hidden"></div>
+
+<script>
+document.getElementById("name").value = loginUser
+
+function logout(){
+    localStorage.removeItem("loginUser")
+    location.href="login.html"
+}
+
+function toggleMail(){
+    document.getElementById("userMail").classList.toggle("hidden")
+}
+
+function addFeedback(){
+    let name = loginUser
+    let hero = document.getElementById("hero").value
+    let feedback = document.getElementById("feedback").value
+
+    if(!hero || !feedback){ alert("모든 항목을 입력하세요"); return }
+
+    let messages = JSON.parse(localStorage.getItem("messages")) || []
+    messages.push({id:Date.now(),sender:name,hero:hero,content:feedback,reply:"",read:false})
+    localStorage.setItem("messages",JSON.stringify(messages))
+    alert("피드백 제출 완료!")
+    document.getElementById("feedback").value=""
+    loadUserMail()
+}
+
+// 사용자 메일함
+function loadUserMail(){
+    let container = document.getElementById("userMail")
+    let messages = JSON.parse(localStorage.getItem("messages")) || []
+    container.innerHTML = "<h3>📬 내 메일함</h3>"
+    messages.filter(m=>m.sender===loginUser).forEach(m=>{
+        let div = document.createElement("div")
+        div.className="feedback"
+        div.innerHTML = `<strong>🎯 ${m.hero}</strong><p>${m.content.substring(0,30)}...</p>`
+        div.onclick = ()=>{
+            container.innerHTML = `
+                <h3>📩 메일 상세</h3>
+                <p><b>영웅:</b> ${m.hero}</p>
+                <p><b>내용:</b> ${m.content}</p>
+                <hr>
+                <h3>✉ 관리자 답장</h3>
+                <p>${m.reply || "답장이 없습니다."}</p>
+                <br>
+                <button onclick="loadUserMail()">← 뒤로가기</button>
+            `
+        }
+        container.appendChild(div)
+    })
+}
+
+loadUserMail()
+</script>
+
+</body>
+</html>

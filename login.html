@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>커뮤니티 로그인/회원가입</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🎮 Overwatch 커뮤니티</h1>
+
+<h2>로그인</h2>
+<input type="text" id="loginUser" placeholder="닉네임">
+<input type="password" id="loginPw" placeholder="비밀번호">
+<button onclick="login()">로그인</button>
+
+<hr>
+
+<h2>회원가입</h2>
+<input type="text" id="signupUser" placeholder="닉네임">
+<input type="password" id="signupPw" placeholder="비밀번호">
+<button onclick="signup()">회원가입</button>
+
+<script>
+// 회원 DB (localStorage)
+let users = JSON.parse(localStorage.getItem("users")) || []
+
+function signup(){
+    let user = document.getElementById("signupUser").value
+    let pw = document.getElementById("signupPw").value
+
+    if(!user || !pw){ alert("정보를 입력하세요"); return }
+
+    if(users.some(u=>u.username===user)){ alert("이미 존재하는 닉네임입니다"); return }
+
+    users.push({username:user,password:pw})
+    localStorage.setItem("users",JSON.stringify(users))
+    alert("회원가입 완료! 로그인하세요.")
+}
+
+function login(){
+    let user = document.getElementById("loginUser").value
+    let pw = document.getElementById("loginPw").value
+
+    if(!user || !pw){ alert("정보를 입력하세요"); return }
+
+    let u = users.find(u=>u.username===user && u.password===pw)
+    if(!u){ alert("닉네임 또는 비밀번호가 틀립니다"); return }
+
+    localStorage.setItem("loginUser",user)
+    location.href="index.html"
+}
+</script>
+
+</body>
+</html>

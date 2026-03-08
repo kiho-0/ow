@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>관리자 패널</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🛠 관리자 패널</h1>
+<div class="mail-container">
+    <div class="mail-list" id="mailList"></div>
+    <div class="mail-view" id="mailView"><h2>메일을 선택하세요</h2></div>
+</div>
+
+<script>
+let messages = JSON.parse(localStorage.getItem("messages")) || []
+let list = document.getElementById("mailList")
+let view = document.getElementById("mailView")
+
+function loadMail(){
+    messages = JSON.parse(localStorage.getItem("messages")) || []
+    list.innerHTML=""
+    messages.forEach((m)=>{
+        let item = document.createElement("div")
+        item.className="mail-item"
+        let status = m.reply ? "✅ 답변완료" : "⏳ 검토중"
+        item.innerHTML = `<strong>${m.sender}</strong><br>${m.hero}<br><small>${status}</small>`
+        item.onclick = ()=>{
+            view.innerHTML = `
+                <h2>🎯 ${m.hero}</h2>
+                <p><b>작성자:</b> ${m.sender}</p>
+                <p>${m.content}</p>
+                <hr>
+                <h3>✉ 답장 작성</h3>
+                <textarea id="replyText">${m.reply||""}</textarea><br>
+                <button onclick="reply(${m.id})">답장 저장</button>
+                <button onclick="deleteMail(${m.id})">삭제</button>
+            `
+        }
+        list.appendChild(item)
+    })
+}
+
+function reply(id){
+    let text = document.getElementById("replyText").value
+    messages = messages.map(m=>{ if(m.id===id){ m.reply=text; m.read=true } return m })
+    localStorage.setItem("messages",JSON.stringify(messages))
+    alert("답장 저장 완료")
+    loadMail()
+}
+
+function deleteMail(id){
+    if(!confirm("삭제하시겠습니까?")) return
+    messages = messages.filter(m=>m.id!==id)
+    localStorage.setItem("messages",JSON.stringify(messages))
+    loadMail()
+    view.innerHTML="<h2>삭제됨</h2>"
+}
+
+loadMail()
+</script>
+
+</body>
+</html>
